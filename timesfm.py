@@ -50,7 +50,7 @@ tfm = TimesFm(
 )
 
 # 登录Hugging Face Hub
-login("****")#请用自己的替换
+login("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")#请用自己的替换
 
 tfm.load_from_checkpoint(repo_id="google/timesfm-1.0-200m")
 
