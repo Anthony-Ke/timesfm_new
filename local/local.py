@@ -21,7 +21,7 @@ context_data = data2[-context_len:]  # 使用最近512天的数据作为上下�
 
 # 登录Hugging Face Hub并添加到Git凭证助手
 try:
-    login("******", add_to_git_credential=True)
+    login("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", add_to_git_credential=True)
 except Exception as e:
     print(f"登录Hugging Face Hub时发生错误: {e}")
 
@@ -34,7 +34,7 @@ try:
         output_patch_len=128,
         num_layers=20,
         model_dims=1280,
-        backend='cpu'
+        backend='gpu'
     )
     tfm.load_from_checkpoint(repo_id="google/timesfm-1.0-200m")
 except Exception as e:
