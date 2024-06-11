@@ -42,17 +42,7 @@ if len(data2) < context_len:
 
 context_data = data2[-context_len:]  # 使用最近512天的数据作为上下文
 
-# 定义优化器
-learning_rate = 0.001
-tx = optax.adam(learning_rate)
 
-# 定义 TrainState 的未填充形状和数据类型
-train_state_unpadded_shape_dtype_struct = TrainState(
-    step=jnp.array(0),
-    params={'params': jnp.zeros((context_len, 1), dtype=jnp.float32)},
-    apply_fn=tfm.apply,
-    tx=tx
-)
 
 # 初始化和导入TimesFM模型
 tfm = TimesFm(
@@ -63,6 +53,18 @@ tfm = TimesFm(
     num_layers=20,
     model_dims=1280,
     backend='gpu',  # 修改这里，将'gpu'改为'cpu'
+)
+
+# 定义优化器
+learning_rate = 0.001
+tx = optax.adam(learning_rate)
+
+# 定义 TrainState 的未填充形状和数据类型
+train_state_unpadded_shape_dtype_struct = TrainState(
+    step=jnp.array(0),
+    params={'params': jnp.zeros((context_len, 1), dtype=jnp.float32)},
+    apply_fn=tfm.apply,
+    tx=tx
 )
 
 # 登录Hugging Face Hub，此处****需替换成自己的Hugging token
