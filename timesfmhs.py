@@ -6,7 +6,7 @@ import pandas as pd
 import time
 from datetime import date
 from timesfm import TimesFm
-from huggingface_hub import login
+from huggingface_hub import login , snapshot_download
 import matplotlib.pyplot as plt
 import jax.numpy as jnp
 import orbax.checkpoint as orbax  # 确保导入orbax
