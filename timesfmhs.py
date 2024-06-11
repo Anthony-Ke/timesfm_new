@@ -10,6 +10,7 @@ from huggingface_hub import login
 import matplotlib.pyplot as plt
 import jax.numpy as jnp
 import orbax.checkpoint as orbax  # 确保导入orbax
+import os
 
 
 # 给定需要处理的股票代码，上海票以.ss结尾，深圳票以.sz结尾
@@ -57,8 +58,12 @@ tfm = TimesFm(
 # 登录Hugging Face Hub，此处****需替换成自己的Hugging token
 login("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")
 
+# 从 Hugging Face Hub 下载模型快照
+model_id = "google/timesfm-1.0-200m"
+local_model_path = snapshot_download(repo_id=model_id)
+
 # 设置检查点路径
-checkpoint_path = "/home/yuhaoke/.cache/huggingface/hub/models--google--timesfm-1.0-200m/snapshots/8775f7531211ac864b739fe776b0b255c277e2be/checkpoints"
+checkpoint_path = os.path.join(local_model_path, "checkpoints")
 
 # 使用新的 CheckpointManager API 加载模型
 options = orbax.CheckpointManagerOptions(max_to_keep=1)
