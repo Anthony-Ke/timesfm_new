@@ -51,42 +51,11 @@ if not huggingface_token:
 
 login(huggingface_token)
 
-# 从 Hugging Face Hub 下载模型快照
+# 直接从 Hugging Face Hub 加载模型
 model_id = "google/timesfm-1.0-200m"
-local_model_path = snapshot_download(repo_id=model_id)
 
-# 确认下载路径
-print(f"模型下载路径: {local_model_path}")
-
-# 列出下载目录中的文件和目录
-for root, dirs, files in os.walk(local_model_path):
-    print(root)
-    for file in files:
-        print(f"\t{file}")
-
-# 设置检查点路径
-checkpoint_path = os.path.join(local_model_path, "checkpoints")
-print(f"检查点路径: {checkpoint_path}")
-
-# 使用新的 CheckpointManager API 加载模型
-options = orbax.CheckpointManagerOptions(max_to_keep=1)
-checkpoint_manager = orbax.CheckpointManager(checkpoint_path, options=options)
-
-# 设置未填充形状和数据类型
-train_state_unpadded_shape_dtype_struct = {
-    "step": jnp.array(0),
-    "params": {'params': jnp.zeros((context_len, 1), dtype=jnp.float32)}
-}
-
-# 恢复检查点
-try:
-    train_state = checkpoint_manager.restore(
-        "latest",
-        items=train_state_unpadded_shape_dtype_struct,
-    )
-except Exception as e:
-    print(f"恢复检查点失败：{e}")
-    train_state = None
+# 初始化和导入TimesFM模型
+tfm = TimesFm.from_pretrained(model_id, use_auth_token=huggingface_token)
 
 # 准备数据
 forecast_input = [context_data.values]
