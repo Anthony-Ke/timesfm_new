@@ -44,26 +44,23 @@ context_data = data2[-context_len:]  # 使用最近512天的数据作为上下�
 
 
 
-# 初始化和导入TimesFM模型
-tfm = TimesFm(
-    context_len=context_len,
-    horizon_len=horizon_len,
-    input_patch_len=32,
-    output_patch_len=128,
-    num_layers=20,
-    model_dims=1280,
-    backend='gpu',  # 修改这里，将'gpu'改为'cpu'
-)
+# 登录Hugging Face Hub，使用环境变量获取token
+huggingface_token = os.getenv('HUGGINGFACE_TOKEN')
+if not huggingface_token:
+    raise ValueError("请设置HUGGINGFACE_TOKEN环境变量")
 
-# 登录Hugging Face Hub，此处****需替换成自己的Hugging token
-login("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")
+login(huggingface_token)
 
 # 从 Hugging Face Hub 下载模型快照
 model_id = "google/timesfm-1.0-200m"
 local_model_path = snapshot_download(repo_id=model_id)
 
+# 确认下载路径
+print(f"模型下载路径: {local_model_path}")
+
 # 设置检查点路径
 checkpoint_path = os.path.join(local_model_path, "checkpoints")
+print(f"检查点路径: {checkpoint_path}")
 
 # 使用新的 CheckpointManager API 加载模型
 options = orbax.CheckpointManagerOptions(max_to_keep=1)
