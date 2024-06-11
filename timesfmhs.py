@@ -58,6 +58,12 @@ local_model_path = snapshot_download(repo_id=model_id)
 # 确认下载路径
 print(f"模型下载路径: {local_model_path}")
 
+# 列出下载目录中的文件和目录
+for root, dirs, files in os.walk(local_model_path):
+    print(root)
+    for file in files:
+        print(f"\t{file}")
+
 # 设置检查点路径
 checkpoint_path = os.path.join(local_model_path, "checkpoints")
 print(f"检查点路径: {checkpoint_path}")
