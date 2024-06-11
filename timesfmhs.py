@@ -9,9 +9,8 @@ from timesfm import TimesFm
 from huggingface_hub import login
 import matplotlib.pyplot as plt
 import jax.numpy as jnp
-from orbax.checkpoint import CheckpointManager
-from flax.training.train_state import TrainState
-import optax
+import orbax.checkpoint as orbax  # 确保导入orbax
+
 
 # 给定需要处理的股票代码，上海票以.ss结尾，深圳票以.sz结尾
 start = date(2020, 1, 1)  # 使用date类创建日期对象
