@@ -55,31 +55,31 @@ tfm = TimesFm(
     backend='gpu',  # 修改这里，将'gpu'改为'cpu'
 )
 
-# 定义优化器
-learning_rate = 0.001
-tx = optax.adam(learning_rate)
-
-# 定义 TrainState 的未填充形状和数据类型
-train_state_unpadded_shape_dtype_struct = TrainState(
-    step=jnp.array(0),
-    params={'params': jnp.zeros((context_len, 1), dtype=jnp.float32)},
-    apply_fn=tfm.apply,
-    tx=tx
-)
-
 # 登录Hugging Face Hub，此处****需替换成自己的Hugging token
 login("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")
 
+# 设置检查点路径
+checkpoint_path = "/home/yuhaoke/.cache/huggingface/hub/models--google--timesfm-1.0-200m/snapshots/8775f7531211ac864b739fe776b0b255c277e2be/checkpoints"
+
 # 使用新的 CheckpointManager API 加载模型
-checkpoint_manager = CheckpointManager(
-    directory="/home/yuhaoke/.cache/huggingface/hub/models--google--timesfm-1.0-200m/snapshots/8775f7531211ac864b739fe776b0b255c277e2be/checkpoints"
-)
+options = orbax.CheckpointManagerOptions(max_to_keep=1)
+checkpoint_manager = orbax.CheckpointManager(checkpoint_path, options=options)
+
+# 设置未填充形状和数据类型
+train_state_unpadded_shape_dtype_struct = {
+    "step": jnp.array(0),
+    "params": {'params': jnp.zeros((context_len, 1), dtype=jnp.float32)}
+}
 
 # 恢复检查点
 try:
-    train_state = checkpoint_manager.restore()
+    train_state = checkpoint_manager.restore(
+        "latest",
+        items=train_state_unpadded_shape_dtype_struct,
+    )
 except Exception as e:
     print(f"恢复检查点失败：{e}")
+    train_state = None
 
 # 准备数据
 forecast_input = [context_data.values]
