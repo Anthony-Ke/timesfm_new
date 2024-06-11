@@ -9,7 +9,7 @@ from timesfm import TimesFm
 from huggingface_hub import login
 import matplotlib.pyplot as plt
 import jax.numpy as jnp
-from orbax.checkpoint import CheckpointManager, FlaxCheckpointHandler
+from orbax.checkpoint import CheckpointManager
 from flax.training.train_state import TrainState
 
 # 给定需要处理的股票代码，上海票以.ss结尾，深圳票以.sz结尾
@@ -64,8 +64,7 @@ login("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")
 
 # 使用新的 CheckpointManager API 加载模型
 checkpoint_manager = CheckpointManager(
-    directory="/home/yuhaoke/.cache/huggingface/hub/models--google--timesfm-1.0-200m/snapshots/8775f7531211ac864b739fe776b0b255c277e2be/checkpoints",
-    checkpoint_handler=FlaxCheckpointHandler()
+    directory="/home/yuhaoke/.cache/huggingface/hub/models--google--timesfm-1.0-200m/snapshots/8775f7531211ac864b739fe776b0b255c277e2be/checkpoints"
 )
 
 # 恢复检查点
