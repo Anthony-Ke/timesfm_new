@@ -8,6 +8,9 @@ from datetime import date
 from timesfm import TimesFm
 from huggingface_hub import login
 import matplotlib.pyplot as plt
+import jax.numpy as jnp
+from orbax.checkpoint import CheckpointManager, CheckpointArgs, FlaxCheckpointHandler
+from flax.training.train_state import TrainState
 
 # 给定需要处理的股票代码，上海票以.ss结尾，深圳票以.sz结尾
 start = date(2020, 1, 1)  # 使用date类创建日期对象
@@ -38,6 +41,13 @@ if len(data2) < context_len:
 
 context_data = data2[-context_len:]  # 使用最近512天的数据作为上下文
 
+# 定义 TrainState 的未填充形状和数据类型
+train_state_unpadded_shape_dtype_struct = TrainState(
+    step=jnp.array(0),
+    params={'params': jnp.zeros((context_len, 1), dtype=jnp.float32)},
+    opt_state=None
+)
+
 # 初始化和导入TimesFM模型
 tfm = TimesFm(
     context_len=context_len,
@@ -46,13 +56,24 @@ tfm = TimesFm(
     output_patch_len=128,
     num_layers=20,
     model_dims=1280,
-    backend='cpu',  # 修改这里，将'gpu'改为'cpu'
+    backend='gpu',  # 修改这里，将'gpu'改为'cpu'
 )
 
 # 登录Hugging Face Hub，此处****需替换成自己的Hugging token
 login("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")
 
-tfm.load_from_checkpoint(repo_id="google/timesfm-1.0-200m")
+# 使用新的 CheckpointManager API 加载模型
+checkpoint_manager = CheckpointManager(
+    directory="/home/yuhaoke/.cache/huggingface/hub/models--google--timesfm-1.0-200m/snapshots/8775f7531211ac864b739fe776b0b255c277e2be/checkpoints",
+    checkpoint_handler=FlaxCheckpointHandler(),
+    options=CheckpointArgs(train_state_unpadded_shape_dtype_struct=train_state_unpadded_shape_dtype_struct)
+)
+
+# 恢复检查点
+try:
+    train_state = checkpoint_manager.restore()
+except Exception as e:
+    print(f"恢复检查点失败：{e}")
 
 # 准备数据
 forecast_input = [context_data.values]
